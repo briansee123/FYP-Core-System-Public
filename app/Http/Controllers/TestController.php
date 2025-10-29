@@ -1,5 +1,4 @@
 <?php
-// ...existing code...
 
 namespace App\Http\Controllers;
 
@@ -10,7 +9,15 @@ use App\Models\TestResult;
 class TestController extends Controller
 {
     /**
-     * Save the user's test result to the database.
+     * Show the test page
+     */
+    public function index()
+    {
+        return view('test');
+    }
+
+    /**
+     * Save the user's test result to the database
      */
     public function store(Request $request)
     {
@@ -20,29 +27,24 @@ class TestController extends Controller
             'interests' => 'required|string|max:255',
             'academic' => 'required|string|max:255',
             'mbti' => 'required|string|max:10',
+            'recommended_jobs' => 'nullable|string',
         ]);
 
-        // Save to the test_results table
-        TestResult::create([
-            'user_id' => Auth::id(),
-            'skills' => $validated['skills'],
-            'interests' => $validated['interests'],
-            'academic' => $validated['academic'],
-            'mbti' => $validated['mbti'],
-            'recommended_jobs' => $request->input('recommended_jobs', ''),
+        // Create a new record
+        $testResult = new TestResult();
+        $testResult->user_id = Auth::id();
+        $testResult->skills = $validated['skills'];
+        $testResult->interests = $validated['interests'];
+        $testResult->academic = $validated['academic'];
+        $testResult->mbti = $validated['mbti'];
+        $testResult->recommended_jobs = $request->input('recommended_jobs', '');
+        $testResult->save();
+
+        // Return JSON to frontend
+        return response()->json([
+            'success' => true,
+            'message' => 'Test result saved successfully!',
+            'data' => $testResult
         ]);
-
-        return response()->json(['message' => 'Test result saved successfully!']);
-    }
-
-    /**
-     * Show all test results for the logged-in user.
-     */
-    public function index()
-    {
-        $results = TestResult::where('user_id', Auth::id())->latest()->get();
-
-        return view('my_results', ['results' => $results]);
     }
 }
-// ...existing code...

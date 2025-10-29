@@ -138,7 +138,7 @@
         <div class="test-desc">
             Your AI-powered guide to the perfect career path
         </div>
-        <form method="POST" action="{{ route('submit.test') }}">
+        <form id="test-form">
     @csrf
 
             <div class="section-header">Career & Personality Test</div>
