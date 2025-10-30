@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TestResult;
+use App\Services\CareerAI;
+
 
 class TestController extends Controller
 {
@@ -30,21 +32,31 @@ class TestController extends Controller
             'recommended_jobs' => 'nullable|string',
         ]);
 
-        // Create a new record
-        $testResult = new TestResult();
-        $testResult->user_id = Auth::id();
-        $testResult->skills = $validated['skills'];
-        $testResult->interests = $validated['interests'];
-        $testResult->academic = $validated['academic'];
-        $testResult->mbti = $validated['mbti'];
-        $testResult->recommended_jobs = $request->input('recommended_jobs', '');
-        $testResult->save();
+        // 🧠 Use our AI service to generate recommendations
+$ai = new CareerAI();
+$recommended = $ai->analyze(
+    $validated['skills'],
+    $validated['interests'],
+    $validated['academic'],
+    $validated['mbti']
+);
 
-        // Return JSON to frontend
-        return response()->json([
-            'success' => true,
-            'message' => 'Test result saved successfully!',
-            'data' => $testResult
-        ]);
+// Create a new record with AI-generated jobs
+$testResult = new TestResult();
+$testResult->user_id = Auth::id();
+$testResult->skills = $validated['skills'];
+$testResult->interests = $validated['interests'];
+$testResult->academic = $validated['academic'];
+$testResult->mbti = $validated['mbti'];
+$testResult->recommended_jobs = $recommended;
+$testResult->save();
+
+
+  return response()->json([
+    'success' => true,
+    'message' => 'Test result saved successfully!',
+    'data' => $testResult
+]);
+
     }
 }
